@@ -17,12 +17,16 @@ var twitter = require('ntwitter');
 var outputs = [];
 var MonitoringKeywords = [{phrase:'apple'}];
  
+// Twitter keys registered for url: http://sentimentanalysis-twitter-akehir.eu-gb.mybluemix.net/
+// Created at: https://dev.twitter.com/apps
 var tweeter = new twitter({
-    consumer_key: 'pxgpKlOkM2ZzDtDtHdN1rNGHE',
-    consumer_secret: 'OD8y15tzLopptWGTgsODsXxCInEQ9qp3h9mQtGtXK9qR4rlmHm',
-    access_token_key: '2151132853-K7nCNfeCbSjdSZvOgyfm7NCMPlweIxVAFsZzQE6',
-    access_token_secret: 'LPpYQVmvrC9S3Y1I6aEBW7czcltN1b7iZfn442kvuxOEi'	
+	consumer_key: '1sUZwiAsNf10CormEHFHHjvi4',
+	consumer_secret: 'exCPrWNVYbKvq5EjXD7N7J03BCOzzqbDB0qoryJSncKLgdBO94',
+	access_token_key: '72076928-3k6OWatiPDXCrnmtTKLgax7hdvtssqJmBRuCMV1pr',
+	access_token_secret: 'F7Kbjf5mduPRRjOahLksXq66xTUsSGNwWrYFLQyCib4rQ'
 });
+
+
 tweeter.verifyCredentials(function (error, data) { 
 	console.log("Hello, " + data.name + ".  I am in your twitters.");
 });
