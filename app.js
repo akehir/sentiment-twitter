@@ -1,32 +1,38 @@
-/* text form
-var MonitoringKeywords = [
-			{
-				phrase:  'apple'				
-			}
-		];
-var outputs = [
-			{
-				phrase:  'apple',
-				text:,
-				date: 
-			}
-		];
+var port = (process.env.VCAP_APP_PORT || 3000);
+var express = require("express"); 
 
-*/
+
+var twitter = require('ntwitter');
+var DEFAULT_TOPIC = "IBM";
+
+// defensiveness against errors parsing request bodies...
+process.on('uncaughtException', function (err) {
+	console.log('Caught exception: ' + err.stack);
+});
+
+var app = express();
+// Configure the app web container
+app.configure(function() {
+	app.use(express.bodyParser());
+	app.use(express.static(__dirname + '/public'));
+});
+
+   
+
+app.get('/sentiment', function (req, res) {
+	 
+}); 
+  
 var twitter = require('ntwitter');
 var outputs = [];
 var MonitoringKeywords = [{phrase:'apple'}];
- 
-// Twitter keys registered for url: http://sentimentanalysis-twitter-akehir.eu-gb.mybluemix.net/
-// Created at: https://dev.twitter.com/apps
+var stream; 
 var tweeter = new twitter({
-	consumer_key: '1sUZwiAsNf10CormEHFHHjvi4',
-	consumer_secret: 'exCPrWNVYbKvq5EjXD7N7J03BCOzzqbDB0qoryJSncKLgdBO94',
-	access_token_key: '72076928-3k6OWatiPDXCrnmtTKLgax7hdvtssqJmBRuCMV1pr',
-	access_token_secret: 'F7Kbjf5mduPRRjOahLksXq66xTUsSGNwWrYFLQyCib4rQ'
+    consumer_key: 'pxgpKlOkM2ZzDtDtHdN1rNGHE',
+    consumer_secret: 'OD8y15tzLopptWGTgsODsXxCInEQ9qp3h9mQtGtXK9qR4rlmHm',
+    access_token_key: '2151132853-K7nCNfeCbSjdSZvOgyfm7NCMPlweIxVAFsZzQE6',
+    access_token_secret: 'LPpYQVmvrC9S3Y1I6aEBW7czcltN1b7iZfn442kvuxOEi'	
 });
-
-
 tweeter.verifyCredentials(function (error, data) { 
 	console.log("Hello, " + data.name + ".  I am in your twitters.");
 });
@@ -70,7 +76,7 @@ tweeter.verifyCredentials(function (error, data) {
 					}
 						 
 				});
-			});
+			}); 
 			return stream;
 		}
 });
@@ -79,3 +85,9 @@ tweeter.verifyCredentials(function (error, data) {
 setInterval(function(){
   console.log(outputs);
 },  5000);  
+
+//app.listen(1337,'127.0.0.1');
+
+app.listen(port);
+console.log("Server listening on port " + port);
+

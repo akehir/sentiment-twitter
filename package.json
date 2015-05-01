@@ -3,9 +3,9 @@
   "description": "Simple Sentiment Analysis App",
   "version": "0.9.1",
   "dependencies": {
-    "express": "3.x",
-    "sentiment": "0.2.1",
-    "ntwitter": "0.5.0" 
+    "express": "^3.3.4",
+    "ntwitter": "^0.5.0",
+    "sentiment": "^0.2.1"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
@@ -18,5 +18,3 @@
     "start": "node app.js"
   }
 }
-
-
