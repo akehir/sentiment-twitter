@@ -71,7 +71,7 @@ app.get('/addSingleTweet', function (req, res) {
 //Twitter Analysis
 var twitter = require('ntwitter');
 var outputs = [];
-var MonitoringKeywords = [{phrase:'apple'}];
+var monitoringKeywords = [];
 var stream; 
 var tweeter = new twitter({
     consumer_key: 'pxgpKlOkM2ZzDtDtHdN1rNGHE',
@@ -84,13 +84,13 @@ tweeter.verifyCredentials(function (error, data) {
 });
 
 function FindOutKeyWords(data) {
-	for(var i=0;i<MonitoringKeywords.length;i++){ 
+	for(var i=0;i<monitoringKeywords.length;i++){ 
 		tweeterText = data.text.toString();
-		if(tweeterText.search(MonitoringKeywords[i].phrase.toString().toLowerCase())!=-1)	{
+		if(tweeterText.search(monitoringKeywords[i].phrase.toString().toLowerCase())!=-1)	{
 			//console.log(data.text);
 			//console.log(data.created_at);
 			outputs.push({
-				phrase:  MonitoringKeywords[i].phrase,
+				phrase:  monitoringKeywords[i].phrase,
 				text:	 tweeterText,
 				date: 	 data.created_at	
 			})
@@ -98,17 +98,17 @@ function FindOutKeyWords(data) {
 	}
 }
 
-function FormatInput() {
-	MonitoringKeywords.push({phrase:'coke'});
-}
+// function FormatInput() {
+// 	monitoringKeywords.push({phrase:'coke'});
+// }
 
 tweeter.verifyCredentials(function (error, data) {
 		if (error) {
 			return "Error connecting to Twitter: " + error;
 		} else {
 			FormatInput();		
-			console.log(MonitoringKeywords);	 
-			KeyWords =  MonitoringKeywords.map(function(elem){return elem.phrase;}).join(",");
+			console.log(monitoringKeywords);	 
+			KeyWords =  monitoringKeywords.map(function(elem){return elem.phrase;}).join(",");
 			console.log(KeyWords);
 
 			stream = tweeter.stream('statuses/filter', {
@@ -134,10 +134,10 @@ setInterval(function(){
 	var collection = myDb.collection(dbKeywordsCollection);
 	collection.find().toArray(function(err, docs) {
 		if (docs.length > 0) {
-			console.log("Keywords:");
-	    	console.log(docs);
+	    	monitoringKeywords = docs;
 	    } else {
 	    	console.log("No keywords in database!");
+	    	monitoringKeywords = [];
 	    }
 	  });
 
