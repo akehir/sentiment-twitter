@@ -139,9 +139,8 @@ setInterval(function(){
 	    } else {
 	    	console.log("No keywords in database!");
 	    }
-	    res.send(200);
 	  });
-	
+
 
   console.log(outputs);
 },  5000);  
