@@ -147,7 +147,6 @@ function checkNewKeywords() {
 	var collection = myDb.collection(dbKeywordsCollection);
 	collection.find().toArray(function(err, docs) {
 		if (docs.length > 0) {
-			console.log(docs);
 			if (JSON.stringify(monitoringKeywords) != JSON.stringify(docs)) {
 		    	monitoringKeywords = docs;
 		    	establishTwitterConnection();
