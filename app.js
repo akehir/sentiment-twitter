@@ -43,6 +43,12 @@ var mongoConnection = mongoClient.connect(mongo.url, function(err, db) {
   if(!err) {
     console.log("Connection to mongoDB established");
     myDb = db;
+
+
+	setInterval(function(){
+			checkNewKeywords();
+		},  5000);
+
   } else {
   	console.log("Failed to connect to database!");
   }
@@ -136,9 +142,7 @@ function establishTwitterConnection() {
 	});
 }
 
-
-setInterval(function(){
-
+function checkNewKeywords() {
 	// Check MongoDB Keywords Collection
 	var collection = myDb.collection(dbKeywordsCollection);
 	collection.find().toArray(function(err, docs) {
@@ -160,8 +164,7 @@ setInterval(function(){
 		    }
 	    }
 	  });
-
-},  5000);  
+}
 
 //app.listen(1337,'127.0.0.1');
 
