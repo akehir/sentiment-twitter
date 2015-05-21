@@ -52,21 +52,24 @@ var mongoConnection = mongoClient.connect(mongo.url, function(err, db) {
 // REST API
 app.get('/liveMode', function (req, res) {
 	//Switch to live mode
+	console.log("Live mode request");
 	res.send(200);
 }); 
   
 app.get('/demoMode', function (req, res) {
 	//Switch to demo mode
+	console.log("Demo mode request");
 	res.send(200);
 });
 
 app.get('/clearDatabase', function (req, res) {
-	//Clear Database
+	console.log("Clear database request");
 	res.send(200);
 }); 
 
 app.get('/addSingleTweet', function (req, res) {
 	//Add single tweet
+	console.log("Add single tweet request");
 	res.send(200);
 });
 
@@ -102,7 +105,7 @@ function FindOutKeyWords(data) {
 			}
 
 			outputs.push(tweet);
-			//collection.insert(tweet);
+			collection.insert(tweet);
 		}
 	}
 }
