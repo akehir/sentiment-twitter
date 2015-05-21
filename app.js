@@ -85,9 +85,9 @@ var tweeter = new twitter({
     access_token_key: '2151132853-K7nCNfeCbSjdSZvOgyfm7NCMPlweIxVAFsZzQE6',
     access_token_secret: 'LPpYQVmvrC9S3Y1I6aEBW7czcltN1b7iZfn442kvuxOEi'	
 });
-tweeter.verifyCredentials(function (error, data) { 
-	console.log("Hello, " + data.name + ".  I am in your twitters.");
-});
+// tweeter.verifyCredentials(function (error, data) { 
+// 	console.log("Hello, " + data.name + ".  I am in your twitters.");
+// });
 
 function FindOutKeyWords(data) {
 
