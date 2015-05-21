@@ -20,6 +20,9 @@ app.configure(function() {
 
 // Database Connection
 var mongo = {};
+
+var dbResultsCollection		= "results";
+var dbAnalyzingCollection	= "analyzing";
 var dbKeywordsCollection	= "keywords";
 
 if (process.env.VCAP_SERVICES) {
@@ -84,16 +87,22 @@ tweeter.verifyCredentials(function (error, data) {
 });
 
 function FindOutKeyWords(data) {
+
+	var collection = myDb.collection(dbAnalyzingCollection);
+
 	for(var i=0;i<monitoringKeywords.length;i++){ 
 		tweeterText = data.text.toString();
 		if(tweeterText.search(monitoringKeywords[i].phrase.toString().toLowerCase())!=-1)	{
 			//console.log(data.text);
 			//console.log(data.created_at);
-			outputs.push({
+			var tweet = {
 				phrase:  monitoringKeywords[i].phrase,
 				text:	 tweeterText,
 				date: 	 data.created_at	
-			})
+			}
+
+			outputs.push(tweet);
+			//collection.insert(tweet);
 		}
 	}
 }
