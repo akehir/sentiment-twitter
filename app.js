@@ -104,7 +104,7 @@ function FindOutKeyWords(data) {
 				date: 	 data.created_at	
 			}
 
-			outputs.push(tweet);
+			console.log(tweet);
 			collection.insert(tweet);
 		}
 	}
@@ -146,6 +146,8 @@ setInterval(function(){
 			if (monitoringKeywords != docs) {
 		    	monitoringKeywords = docs;
 		    	establishTwitterConnection();
+		    	console.log("New keywords:");
+		    	console.log(monitoringKeywords);
 		    }
 	    } else {
 	    	console.log("No keywords in database!");
@@ -156,8 +158,6 @@ setInterval(function(){
 	    }
 	  });
 
-
-  console.log(outputs);
 },  5000);  
 
 //app.listen(1337,'127.0.0.1');
