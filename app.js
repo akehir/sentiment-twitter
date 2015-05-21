@@ -110,16 +110,11 @@ function FindOutKeyWords(data) {
 	}
 }
 
-// function FormatInput() {
-// 	monitoringKeywords.push({phrase:'coke'});
-// }
-
 function establishTwitterConnection() {
 	tweeter.verifyCredentials(function (error, data) {
 			if (error) {
 				return "Error connecting to Twitter: " + error;
 			} else {
-				FormatInput();		
 				console.log(monitoringKeywords);	 
 				KeyWords =  monitoringKeywords.map(function(elem){return elem.phrase;}).join(",");
 				console.log(KeyWords);
