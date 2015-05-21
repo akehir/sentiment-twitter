@@ -111,30 +111,32 @@ function FindOutKeyWords(data) {
 // 	monitoringKeywords.push({phrase:'coke'});
 // }
 
-tweeter.verifyCredentials(function (error, data) {
-		if (error) {
-			return "Error connecting to Twitter: " + error;
-		} else {
-			FormatInput();		
-			console.log(monitoringKeywords);	 
-			KeyWords =  monitoringKeywords.map(function(elem){return elem.phrase;}).join(",");
-			console.log(KeyWords);
+function establishTwitterConnection() {
+	tweeter.verifyCredentials(function (error, data) {
+			if (error) {
+				return "Error connecting to Twitter: " + error;
+			} else {
+				FormatInput();		
+				console.log(monitoringKeywords);	 
+				KeyWords =  monitoringKeywords.map(function(elem){return elem.phrase;}).join(",");
+				console.log(KeyWords);
 
-			stream = tweeter.stream('statuses/filter', {
-				'track': KeyWords
-			}, function (stream) {
-				console.log("Monitoring Twitter for "); 
-				stream.on('data', function (data) {
-					// only evaluate the sentiment of English-language tweets
-					if (data.lang === 'en') {
-						FindOutKeyWords(data);
-					}
-						 
-				});
-			}); 
-			return stream;
-		}
-});
+				stream = tweeter.stream('statuses/filter', {
+					'track': KeyWords
+				}, function (stream) {
+					console.log("Monitoring Twitter for "); 
+					stream.on('data', function (data) {
+						// only evaluate the sentiment of English-language tweets
+						if (data.lang === 'en') {
+							FindOutKeyWords(data);
+						}
+							 
+					});
+				}); 
+				return stream;
+			}
+	});
+}
 
 
 setInterval(function(){
@@ -143,10 +145,16 @@ setInterval(function(){
 	var collection = myDb.collection(dbKeywordsCollection);
 	collection.find().toArray(function(err, docs) {
 		if (docs.length > 0) {
-	    	monitoringKeywords = docs;
+			if (monitoringKeywords != docs) {
+		    	monitoringKeywords = docs;
+		    	establishTwitterConnection();
+		    }
 	    } else {
 	    	console.log("No keywords in database!");
-	    	monitoringKeywords = [];
+	    	if (monitoringKeywords != []) {
+		    	monitoringKeywords = [];
+		    	establishTwitterConnection();
+		    }
 	    }
 	  });
 
