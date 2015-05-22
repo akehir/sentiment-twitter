@@ -120,7 +120,7 @@ function establishTwitterConnection() {
 	var stream;
 	// cleanup if we're re-setting the monitoring
 	 
-	var monitoringPhrase = MonitoringKeywords.map(function(elem){return elem.phrase;}).join(",");
+	var monitoringPhrase = monitoringKeywords.map(function(elem){return elem.phrase;}).join(",");
 	//console.log(monitoringPhrase); 
 	tweeter.verifyCredentials(function (error, data) {
 		if (error) {
