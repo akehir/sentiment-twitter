@@ -100,7 +100,7 @@ function FindOutKeyWords(data) {
 	var collection = myDb.collection(dbAnalyzingCollection);
 
 	for(var i=0;i<monitoringKeywords.length;i++){ 
-		tweeterText = data.text.toString();
+		tweeterText = data.text.toString().toLowerCase();
 		if(tweeterText.search(monitoringKeywords[i].phrase.toString().toLowerCase())!=-1)	{
 			//console.log(data.text);
 			//console.log(data.created_at);
@@ -110,35 +110,39 @@ function FindOutKeyWords(data) {
 				date: 	 data.created_at	
 			}
 
-			console.log(tweet);
+			//console.log(tweet);
 			collection.insert(tweet);
 		}
 	}
 }
 
 function establishTwitterConnection() {
+	var stream;
+	// cleanup if we're re-setting the monitoring
+	 
+	var monitoringPhrase = MonitoringKeywords.map(function(elem){return elem.phrase;}).join(",");
+	//console.log(monitoringPhrase); 
 	tweeter.verifyCredentials(function (error, data) {
-			if (error) {
-				return "Error connecting to Twitter: " + error;
-			} else {
-				console.log(monitoringKeywords);	 
-				KeyWords =  monitoringKeywords.map(function(elem){return elem.phrase;}).join(",");
-				console.log(KeyWords);
-
-				stream = tweeter.stream('statuses/filter', {
-					'track': KeyWords
-				}, function (stream) {
-					console.log("Monitoring Twitter for "); 
-					stream.on('data', function (data) {
-						// only evaluate the sentiment of English-language tweets
-						if (data.lang === 'en') {
-							FindOutKeyWords(data);
-						}
-							 
-					});
-				}); 
-				return stream;
-			}
+		if (error) {
+			return "Error connecting to Twitter: " + error;
+		} else {
+			stream = tweeter.stream('statuses/filter', {
+				'track': monitoringPhrase
+			}, function (stream) {
+				console.log("Monitoring Twitter for " + monitoringPhrase);
+				stream.on('data', function (data) {
+					// only evaluate the sentiment of English-language tweets
+					if (data.lang === 'en') {
+						 //console.log(data.text.toString());
+						 FindOutKeyWords(data);
+					}
+				});
+				stream.on('error', function (error) {
+					console.log(error);	
+				});
+			});
+			return stream;
+		}
 	});
 }
 
