@@ -10,6 +10,9 @@
 
 	<script src="js/angular.js"></script>
 	<script src="js/controller.js"></script>
+	 <style>
+	#debugDiv {height: 400px; width: 500px; border: 1px solid #333; overflow:scroll;} 
+	</style> 
 </head>
 <body>
 	<nav class="navbar navbar-inverse navbar-fixed-top">
@@ -24,9 +27,14 @@
 		<h1 class="page-header">Controls</h1>
 
 		<button type="submit" class="btn btn-success" ng-click="switchMode()">{{mode}}</button>
-		<button type="submit" class="btn btn-success" ng-click="clearDatabase()">Clear</button>
-	    <button type="submit" class="btn btn-success" ng-click="addSingleTweet()">+1</button>
+		<button type="submit" class="btn btn-success" ng-click="addOneMode()">{{addMode}}</button>
+		<button type="submit" class="btn btn-success" ng-click="addSingleTweet()">+1</button>
+                <button type="submit" class="btn btn-success" ng-click="clearDatabase()">Clear</button>
+	        <button type="submit" class="btn btn-success" ng-click="reset()">restart application</button>
 		
-    </div>
+    </div> 
+    <div class="container-fluid" id="debugDiv">{{debug}}</div>	
+     
+
 </body>
 </html>
