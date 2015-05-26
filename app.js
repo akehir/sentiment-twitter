@@ -165,13 +165,14 @@ app.get('/clearDatabase', function (req, res) {
 	res.send(200);	 
 }); 
 function cleanData(){
-       var collection = myDb.collection(dbKeywordsCollection); 
+    var collection = myDb.collection(dbKeywordsCollection); 
         collection.remove();
 	collection = myDb.collection(dbAnalyzingCollection); 
         collection.remove();
 	collection = myDb.collection(dbResultsCollection); 
         collection.remove();
 	monitoringKeywords = [];
+	output = [];
 }
 function pushData(){
 	var fs = require('fs'),readline = require('readline');
@@ -400,7 +401,10 @@ setInterval(function(){
 	var collection = myDb.collection(dbAnalyzingCollection); 
 	collection.find().toArray(function(err, docs) {
 		console.log('number '+docs.length);
-		debugLog+=' number '+docs.length;	
+		debugLog+=' number '+docs.length;
+		if(output.length>50){
+			output = output.slice(1,50);
+		}
 	});
 }, 5000);
 
