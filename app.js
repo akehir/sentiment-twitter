@@ -102,6 +102,7 @@ function startApp() {
 	  });
 
 
+	//Start checking for new keywords
 	liveModeIntervalId = setInterval(function(){ checkNewKeywords();},  2000); 
     //console.log(liveModeIntervalId);
 }
