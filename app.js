@@ -195,11 +195,15 @@ function pushData(){
 	collection.find().toArray(function(err, docs) {
 		monitoringKeywords = docs;  
 	});
-	 
+
+	if(pushLine==null)
+		pushLine = 1000; 
+	debugLog+=" push start";
+	console.log(pushLine);
+ 	fakeDataPushId = setInterval(function(){ fakeDataPush()},  1000);
+
 	rd.on('line', function(line) {
-		fakeData.push(line.toString());		
-		fakeDataPushId = setInterval(function(){ fakeDataPush()},  1000);
-		 	 
+		fakeData.push(line.toString()); 
 	});
 	rd.on('close', function() { 
 		rd.close();
@@ -210,24 +214,19 @@ function pushData(){
 
 //Thu May 28 13:50:33 +0000 2015",
 
-function fakeDataPush(){
-	
-	if(pushLine==null)
-		pushLine = 1000;
+function fakeDataPush(){ 
 
-
-	pushLine = pushLine - randomInt(10);
-	//console.log(fakeDataPush);
-  
 	for(var i=0;i<pushLine;i++){
 		var line = fakeData.pop();
 		if(line==null){	
 			clearInterval(fakeDataPushId);
+			debugLog+=" push finish";
 			return;
 		}	
 		FindOutKeyWords(line,"Thu May "+(20+randomInt(10))+" 13:50:33 +0000 2015");
 		//console.log(line+'\n'+"Thu May "+(20+randomInt(10))+" 13:50:33 +0000 2015");
-	} 
+   	} 
+	
 }
 
  
@@ -304,7 +303,7 @@ verify();
 function verify(){ 
 	tweeter.verifyCredentials(function (error, data) { 
 		if(error){
-			console.log('verify fail' + nowToken);
+			console.log('verify fail' + token[(nowToken)%numberID].consumer_key);
 			debugLog+=' verify fail' + nowToken;
 			tweeter = new twitter(token[(nowToken++)%numberID]);
 			if(nowToken>15)
