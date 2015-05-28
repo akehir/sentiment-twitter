@@ -1,10 +1,47 @@
-var changePort = 3000;
-var port = (process.env.VCAP_APP_PORT || changePort);
+var port = (process.env.VCAP_APP_PORT || 3000);
 var express = require("express"); 
 var mongoClient = require("mongodb").MongoClient;
-
+var mqlight = require('mqlight');
 var twitter = require('ntwitter');
+
+
+// Settings
 var debugLog = "";
+var liveModeIntervalId = 0;
+var fakeDataPushId = 0;
+var addSingleTweetIntervalId = 0;
+var flag = false;
+
+var dbKeywordsCollection	= "keywords";
+var dbResultsCollection		= "results";
+var dbAnalyzingCollection	= "analyzing";
+
+var mqLightPublishTopic = "mqlight/ase/tweets";
+var mqLightShareID = "ase-twitter";
+var mqlightServiceName = "mqlight";
+var mqlightSubInitialised = false;
+var mqLightClient = null;
+
+
+/*
+ * Establish MQ credentials
+ */
+var opts = {};
+var mqlightService = {};
+if (process.env.VCAP_SERVICES) {
+  var services = JSON.parse(process.env.VCAP_SERVICES);
+  console.log( 'Running BlueMix');
+  if (services[ mqlightServiceName ] == null) {
+    throw 'Error - Check that app is bound to service';
+  }
+  mqlightService = services[mqlightServiceName][0];
+  opts.service = mqlightService.credentials.connectionLookupURI;
+  opts.user = mqlightService.credentials.username;
+  opts.password = mqlightService.credentials.password;
+} else {
+  opts.service = 'amqp://localhost:5672';
+}
+
 
 // defensiveness against errors parsing request bodies...
 process.on('uncaughtException', function (err) {
@@ -22,16 +59,6 @@ app.configure(function() {
 // Database Connection
 var mongo = {};
 
-var dbResultsCollection		= "results";
-var dbAnalyzingCollection	= "analyzing";
-var dbKeywordsCollection	= "keywords";
-var liveModeIntervalId = 0;
-var fakeDataPushId = 0;
-var addSingleTweetIntervalId = 0;
-var flag = false;
-
-
-
 if (process.env.VCAP_SERVICES) {
     var env = JSON.parse(process.env.VCAP_SERVICES);
 
@@ -42,7 +69,42 @@ if (process.env.VCAP_SERVICES) {
     console.log("Mongo URL:" + mongo.url);
 } else {
    console.log("No VCAP Services!");
+   mongo['url'] = "mongodb://localhost:27017/ase";
 } 
+
+var myDb; 
+var mongoConnection = mongoClient.connect(mongo.url, function(err, db) {
+    
+   if(!err) {
+    console.log("Connection to mongoDB established");
+    debugLog+="Connection to mongoDB established";
+    myDb = db;
+
+    // Start Analysis after MongoDB Connection established
+    startApp();
+  } else {
+  	console.log("Failed to connect to database!");
+  }
+}); 
+
+
+function startApp() {
+	/*
+	 * Create our MQ Light client
+	 * If we are not running in Bluemix, then default to a local MQ Light connection  
+	 */
+	mqlightClient = mqlight.createClient(opts, function(err) {
+	    if (err) {
+	      console.error('Connection to ' + opts.service + ' using client-id ' + mqlightClient.id + ' failed: ' + err);
+	    }
+	    else {
+	      console.log('Connected to ' + opts.service + ' using client-id ' + mqlightClient.id);
+	  });
+
+
+	liveModeIntervalId = setInterval(function(){ checkNewKeywords();},  2000); 
+    //console.log(liveModeIntervalId);
+}
 
 
 //Twitter Analysis
@@ -91,6 +153,7 @@ var token=[
     access_token_secret: 'KMg4QqLj1TGzi8HuKCqWY6frbYGMhew983Yb4rMyFUjuu'
 }
 ];
+
 var nowToken = 4;
 var tweeter = new twitter(token[nowToken]);
 var numberID = 6;
@@ -98,20 +161,7 @@ var pushLine=1000;
 var demoMode = false;
 var demoAgain = false;
   
-var myDb; 
-//var mongoConnection = mongoClient.connect('mongodb://127.0.0.1/mydb', function(err, db) {
-var mongoConnection = mongoClient.connect(mongo.url, function(err, db) {
-    
-   if(!err) {
-    console.log("Connection to mongoDB established");
-    debugLog+="Connection to mongoDB established";
-    myDb = db;
-    liveModeIntervalId = setInterval(function(){ checkNewKeywords();},  2000); 
-    //console.log(liveModeIntervalId);
-  } else {
-  	console.log("Failed to connect to database!");
-  }
-}); 
+
 // REST API
 app.get('/reset', function (req, res) {
 
@@ -293,11 +343,21 @@ app.get('/addSingleTweet', function (req, res) {
 	console.log("addSingleTweet");
 	debugLog+="	addSingleTweet";
 	if(addOneMode){
-		var collection = myDb.collection(dbAnalyzingCollection);
+		//var collection = myDb.collection(dbAnalyzingCollection);
 		if(output.length>0){
 		   tmp = output.shift();
-		   collection.insert(tmp);
+		   //collection.insert(tmp);
 		   //console.log(tmp); 
+
+		   var msgData = {
+		      "tweet" : tweet,
+		      "frontend" : "Node.js: " + mqlightClient.id
+		    };
+		    console.log("Sending message: " + JSON.stringify(msgData));
+		    mqlightClient.send(mqlightPublishTopic, msgData, {
+			    ttl: 60*60*1000 /* 1 hour */
+			    });
+
 		   debugLog+=tmp;	
 		}
 	}	
@@ -341,10 +401,19 @@ function FindOutKeyWords(data,created_at) {
 				text:	 tweeterText,
 				date: 	 created_at	
 			}
-			if(addOneMode)
+			if(addOneMode) {
 				output.push(tweet); 
-			else
-				collection.insert(tweet);
+			} else {
+				//collection.insert(tweet);
+				var msgData = {
+			      "tweet" : tweet,
+			      "frontend" : "Node.js: " + mqlightClient.id
+			    };
+			    console.log("Sending message: " + JSON.stringify(msgData));
+			    mqlightClient.send(mqlightPublishTopic, msgData, {
+				    ttl: 60*60*1000 /* 1 hour */
+				    });
+			}
 		}
 	}
 }
