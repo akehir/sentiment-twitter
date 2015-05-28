@@ -90,10 +90,11 @@ var token=[
     access_token_secret: 'KMg4QqLj1TGzi8HuKCqWY6frbYGMhew983Yb4rMyFUjuu'
 }
 ];
-var nowToken = 0;
+var nowToken = 4;
 var tweeter = new twitter(token[nowToken]);
 var numberID = 6;
-var pushLine; 
+var pushLine=1000; 
+var demoMode = false;
   
 var myDb; 
 //var mongoConnection = mongoClient.connect('mongodb://127.0.0.1/mydb', function(err, db) {
@@ -131,6 +132,7 @@ app.get('/reset', function (req, res) {
 
 app.get('/liveMode', function (req, res) {
 	//Switch to live mode
+	demoMode = false;
 	if(addOneMode){
 		clearInterval(addSingleTweetIntervalId);
 		cleanStream();
@@ -145,6 +147,7 @@ app.get('/liveMode', function (req, res) {
   
 app.post('/demoMode', function (req, res) {
 	//Switch to demo mode
+	demoMode = true;
 	debugLog+="	Demo mode request";
 	if (req.body.phrase) {
 		pushLine = req.body.phrase;
@@ -324,7 +327,8 @@ function FindOutKeyWords(data,created_at) {
 		tweeterText = data.toLowerCase();
 		if(tweeterText.search(monitoringKeywords[i].phrase.toString().toLowerCase())!=-1)	{
 			console.log(monitoringKeywords[i].phrase);
-			debugLog+=' '+monitoringKeywords[i].phrase;
+			if(!demoMode)
+				debugLog+=' '+monitoringKeywords[i].phrase;
 			//console.log(created_at);
 			var tweet = {
 				phrase:  monitoringKeywords[i].phrase,
