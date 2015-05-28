@@ -135,6 +135,7 @@ app.get('/reset', function (req, res) {
 app.get('/liveMode', function (req, res) {
 	//Switch to live mode
 	demoMode = false;
+	clearInterval(fakeDataPushId);
 	if(addOneMode){
 		clearInterval(addSingleTweetIntervalId);
 		cleanStream();
