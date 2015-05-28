@@ -7,8 +7,9 @@ app.controller('myCtrl', function($scope, $http, $timeout) {
 
         if ($scope.mode == "Demo") {
 
-        	$http.get('/demoMode').success(function(data) {
-            });
+        	//$http.get('/demoMode').success(function(data) {});
+		$http.post('/demoMode', {phrase:$scope.addTerm}).success(function(data, status, headers, config) {});
+
             $scope.mode = "Live";
 
         } else {

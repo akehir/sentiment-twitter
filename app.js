@@ -92,7 +92,8 @@ var token=[
 ];
 var nowToken = 0;
 var tweeter = new twitter(token[nowToken]);
-var numberID = 6; 
+var numberID = 6;
+var pushLine; 
   
 var myDb; 
 //var mongoConnection = mongoClient.connect('mongodb://127.0.0.1/mydb', function(err, db) {
@@ -142,10 +143,15 @@ app.get('/liveMode', function (req, res) {
 	res.send(200);
 }); 
   
-app.get('/demoMode', function (req, res) {
+app.post('/demoMode', function (req, res) {
 	//Switch to demo mode
-	console.log("Demo mode request"); 
 	debugLog+="	Demo mode request";
+	if (req.body.phrase) {
+		pushLine = req.body.phrase;
+	}
+	console.log("Demo mode request "+pushLine); 
+	
+
 	clearInterval(liveModeIntervalId);
 	clearInterval(addSingleTweetIntervalId);
 	cleanStream(); 
@@ -174,6 +180,8 @@ function cleanData(){
 	monitoringKeywords = [];
 	output = [];
 }
+var fakeData=[];
+var fakeDataPushId;
 function pushData(){
 	var fs = require('fs'),readline = require('readline');
         var rd = readline.createInterface({
@@ -181,6 +189,7 @@ function pushData(){
     		output: process.stdout,
                 terminal: false
 	});
+	fakeData = [];
 	
 	var collection = myDb.collection(dbKeywordsCollection);
 	collection.find().toArray(function(err, docs) {
@@ -188,14 +197,42 @@ function pushData(){
 	});
 	 
 	rd.on('line', function(line) {
-		FindOutKeyWords(line.toString(),0);
-			 
+		fakeData.push(line.toString());		
+		fakeDataPushId = setInterval(function(){ fakeDataPush()},  1000);
+		 	 
 	});
 	rd.on('close', function() { 
 		rd.close();
 			 
 	}); 
 
+}
+
+//Thu May 28 13:50:33 +0000 2015",
+
+function fakeDataPush(){
+	
+	if(pushLine==null)
+		pushLine = 1000;
+
+
+	pushLine = pushLine - randomInt(10);
+	//console.log(fakeDataPush);
+  
+	for(var i=0;i<pushLine;i++){
+		var line = fakeData.pop();
+		if(line==null){	
+			clearInterval(fakeDataPushId);
+			return;
+		}	
+		FindOutKeyWords(line,"Thu May "+(20+randomInt(10))+" 13:50:33 +0000 2015");
+		//console.log(line+'\n'+"Thu May "+(20+randomInt(10))+" 13:50:33 +0000 2015");
+	} 
+}
+
+ 
+function randomInt(max) {
+  return Math.floor(Math.random() * (max));
 }
 
 
@@ -289,7 +326,7 @@ function FindOutKeyWords(data,created_at) {
 		if(tweeterText.search(monitoringKeywords[i].phrase.toString().toLowerCase())!=-1)	{
 			console.log(monitoringKeywords[i].phrase);
 			debugLog+=' '+monitoringKeywords[i].phrase;
-			//console.log(data.created_at);
+			//console.log(created_at);
 			var tweet = {
 				phrase:  monitoringKeywords[i].phrase,
 				text:	 tweeterText,
@@ -408,14 +445,14 @@ setInterval(function(){
 	});
 }, 5000);
 
-/* 
+ 
 setTimeout(function(){ 
 var collection = myDb.collection(dbKeywordsCollection); 
 collection.insert({phrase: 'coke'});
 //location.reload();	
 }, 600);
 
-
+/*
 setTimeout(function(){ 
 var collection = myDb.collection(dbKeywordsCollection); 
 collection.insert({phrase: 'android'});
