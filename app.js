@@ -26,6 +26,7 @@ var dbResultsCollection		= "results";
 var dbAnalyzingCollection	= "analyzing";
 var dbKeywordsCollection	= "keywords";
 var liveModeIntervalId = 0;
+var fakeDataPushId = 0;
 var addSingleTweetIntervalId = 0;
 var flag = false;
 
@@ -166,7 +167,8 @@ app.post('/demoMode', function (req, res) {
 		collection.insert({phrase: 'opera'});	
 		collection.insert({phrase: 'Safari'});
 		collection.insert({phrase: 'Internet Explorer'});
-	}	
+	} 
+	clearInterval(fakeDataPushId);
 	pushData(); 
 	demoAgain = true;
 	res.send(200);
@@ -188,7 +190,6 @@ function cleanData(){
 	output = [];
 }
 var fakeData=[];
-var fakeDataPushId;
 function pushData(){
 	var fs = require('fs'),readline = require('readline');
         var rd = readline.createInterface({
@@ -452,14 +453,14 @@ setInterval(function(){
 	});
 }, 5000);
 
- 
+/* 
 setTimeout(function(){ 
 var collection = myDb.collection(dbKeywordsCollection); 
 collection.insert({phrase: 'coke'});
 //location.reload();	
 }, 600);
 
-/*
+
 setTimeout(function(){ 
 var collection = myDb.collection(dbKeywordsCollection); 
 collection.insert({phrase: 'android'});
