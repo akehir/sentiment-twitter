@@ -95,6 +95,7 @@ var tweeter = new twitter(token[nowToken]);
 var numberID = 6;
 var pushLine=1000; 
 var demoMode = false;
+var demoAgain = false;
   
 var myDb; 
 //var mongoConnection = mongoClient.connect('mongodb://127.0.0.1/mydb', function(err, db) {
@@ -158,13 +159,16 @@ app.post('/demoMode', function (req, res) {
 	clearInterval(liveModeIntervalId);
 	clearInterval(addSingleTweetIntervalId);
 	cleanStream(); 
-	var collection = myDb.collection(dbKeywordsCollection); 
-	collection.insert({phrase: 'chrome'});	
-	collection.insert({phrase: 'Firefox'});	
-	collection.insert({phrase: 'opera'});	
-	collection.insert({phrase: 'Safari'});
-	collection.insert({phrase: 'Internet Explorer'});	
+	if(!demoAgain){
+		var collection = myDb.collection(dbKeywordsCollection); 
+		collection.insert({phrase: 'chrome'});	
+		collection.insert({phrase: 'Firefox'});	
+		collection.insert({phrase: 'opera'});	
+		collection.insert({phrase: 'Safari'});
+		collection.insert({phrase: 'Internet Explorer'});
+	}	
 	pushData(); 
+	demoAgain = true;
 	res.send(200);
 });
 
