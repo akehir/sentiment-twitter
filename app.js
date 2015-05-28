@@ -58,6 +58,9 @@ app.configure(function() {
 
 // Database Connection
 var mongo = {};
+var keywordsCollection = null;
+var analyzingCollection = null;
+var resultsCollection = null;
 
 if (process.env.VCAP_SERVICES) {
     var env = JSON.parse(process.env.VCAP_SERVICES);
@@ -80,8 +83,13 @@ var mongoConnection = mongoClient.connect(mongo.url, function(err, db) {
     debugLog+="Connection to mongoDB established";
     myDb = db;
 
-    // Start Analysis after MongoDB Connection established
-    startApp();
+	keywordsCollection = myDb.collection(dbKeywordsCollection);
+    analyzingCollection = myDb.collection(dbAnalyzingCollection);
+	resultsCollection = myDb.collection(dbResultsCollection);
+
+	// Start the App after DB Connection
+	startApp();
+
   } else {
   	console.log("Failed to connect to database!");
   }
