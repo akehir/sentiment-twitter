@@ -1,7 +1,7 @@
 ---
 applications:
 - name: SentimentAnalysis-Twitter
-  memory: 128M
+  memory: 256M
   instances: 1
   command: node app.js
   host: sentimentanalysis-twitter-akehir
