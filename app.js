@@ -1,4 +1,4 @@
-var port = (process.env.VCAP_APP_PORT || 3000);
+var port = (process.env.VCAP_APP_PORT || 3030);
 var express = require("express"); 
 var mongoClient = require("mongodb").MongoClient;
 var mqlight = require('mqlight');
@@ -16,11 +16,14 @@ var dbKeywordsCollection	= "keywords";
 var dbResultsCollection		= "results";
 var dbAnalyzingCollection	= "analyzing";
 
-var mqLightPublishTopic = "mqlight/ase/tweets";
-var mqLightShareID = "ase-twitter";
+var mqlightTweetsTopic = "mqlight/ase/tweets";
+var mqlightAnalyzedTopic = "mqlight/ase/analyzed";
+var mqlightAggregateTopic = "mqlight/ase/aggregate";
+
+var mqlightShareID = "ase-twitter";
 var mqlightServiceName = "mqlight";
 var mqlightSubInitialised = false;
-var mqLightClient = null;
+var mqlightClient = null;
 
 
 /*
@@ -107,12 +110,58 @@ function startApp() {
 	    }
 	    else {
 	      console.log('Connected to ' + opts.service + ' using client-id ' + mqlightClient.id);
-	  });
+	  }
+	  /*
+	     * Create our subscription
+	     */
+	    mqlightClient.on('message', processMessage);
+	    mqlightClient.subscribe(mqlightAnalyzedTopic, mqlightShareID, 
+	        {credit : 5,
+	           autoConfirm : true,
+	           qos : 0}, function(err) {
+	             if (err) console.error("Failed to subscribe: " + err); 
+	             else {
+	               console.log("Subscribed");
+	               mqlightSubInitialised = true;
+	             }
+	           });
+	});
 
 
 	//Start checking for new keywords
 	liveModeIntervalId = setInterval(function(){ checkNewKeywords();},  2000); 
     //console.log(liveModeIntervalId);
+}
+
+
+/*
+ * Handle each message as it arrives
+ */
+function processMessage(data, delivery) {
+	  var analyzed = data.analyzed;
+	  try {
+	    // Convert JSON into an Object we can work with 
+	    data = JSON.parse(data);
+	    analyzed = data.analyzed;
+	  } catch (e) {
+	    // Expected if we already have a Javascript object
+	  }
+	  if (!tweet) {
+	    console.error("Bad data received: " + data);
+	  }
+	  else {
+	    console.log("Received data: " + JSON.stringify(data));
+	    // Upper case it and publish a notification
+	    
+	    var msgData = {
+		      "analyzed" : analyzed,
+		      "frontend" : "Node.js: " + mqlightClient.id
+		    };
+		    console.log("Sending message: " + JSON.stringify(msgData));
+		    mqlightClient.send(mqlightAggregateTopic, msgData, {
+			    ttl: 60*60*1000 /* 1 hour */
+			    });
+	  }
 }
 
 
@@ -222,9 +271,9 @@ app.post('/demoMode', function (req, res) {
 	cleanStream(); 
 	if(!demoAgain){
 		var collection = myDb.collection(dbKeywordsCollection); 
-		collection.insert({phrase: 'chrome'});	
+		collection.insert({phrase: 'Chrome'});	
 		collection.insert({phrase: 'Firefox'});	
-		collection.insert({phrase: 'opera'});	
+		collection.insert({phrase: 'Opera'});	
 		collection.insert({phrase: 'Safari'});
 		collection.insert({phrase: 'Internet Explorer'});
 	} 
@@ -239,6 +288,7 @@ app.get('/clearDatabase', function (req, res) {
 	cleanData(); 	
 	res.send(200);	 
 }); 
+
 function cleanData(){
     var collection = myDb.collection(dbKeywordsCollection); 
         collection.remove();
@@ -249,6 +299,7 @@ function cleanData(){
 	monitoringKeywords = [];
 	output = [];
 }
+
 var fakeData=[];
 function pushData(){
 	var fs = require('fs'),readline = require('readline');
@@ -335,6 +386,7 @@ app.get('/addOneMode', function (req, res) {
 	}	 
 	res.send(200);
 });
+
 app.get('/stopAddOne', function (req, res) {
 	if(addOneMode){ 		
 		console.log("Stop add one mode");
@@ -347,6 +399,7 @@ app.get('/stopAddOne', function (req, res) {
 	}
 	res.send(200);		
 });
+
 app.get('/addSingleTweet', function (req, res) {
 	//Add single tweet
 	console.log("addSingleTweet");
@@ -363,7 +416,7 @@ app.get('/addSingleTweet', function (req, res) {
 		      "frontend" : "Node.js: " + mqlightClient.id
 		    };
 		    console.log("Sending message: " + JSON.stringify(msgData));
-		    mqlightClient.send(mqlightPublishTopic, msgData, {
+		    mqlightClient.send(mqlightTweetsTopic, msgData, {
 			    ttl: 60*60*1000 /* 1 hour */
 			    });
 
@@ -395,6 +448,7 @@ function verify(){
 		}
 	}); 
 }
+
 function FindOutKeyWords(data,created_at) {
 
 	var collection = myDb.collection(dbAnalyzingCollection); 
@@ -414,12 +468,14 @@ function FindOutKeyWords(data,created_at) {
 				output.push(tweet); 
 			} else {
 				//collection.insert(tweet);
+				console.log("Sending msg");
 				var msgData = {
 			      "tweet" : tweet,
 			      "frontend" : "Node.js: " + mqlightClient.id
 			    };
+			    console.log(msgData);
 			    console.log("Sending message: " + JSON.stringify(msgData));
-			    mqlightClient.send(mqlightPublishTopic, msgData, {
+			    mqlightClient.send(mqlightTweetsTopic, msgData, {
 				    ttl: 60*60*1000 /* 1 hour */
 				    });
 			}
