@@ -3,6 +3,7 @@ var express = require("express");
 var mongoClient = require("mongodb").MongoClient;
 var mqlight = require('mqlight');
 var twitter = require('ntwitter');
+var moment = require('moment');
 
 
 // Settings
@@ -270,12 +271,11 @@ app.post('/demoMode', function (req, res) {
 	clearInterval(addSingleTweetIntervalId);
 	cleanStream(); 
 	if(!demoAgain){
-		var collection = myDb.collection(dbKeywordsCollection); 
-		collection.insert({phrase: 'Chrome'});	
-		collection.insert({phrase: 'Firefox'});	
-		collection.insert({phrase: 'Opera'});	
-		collection.insert({phrase: 'Safari'});
-		collection.insert({phrase: 'Internet Explorer'});
+		keywordsCollection.insert({phrase: 'Chrome'});	
+		keywordsCollection.insert({phrase: 'Firefox'});	
+		keywordsCollection.insert({phrase: 'Opera'});	
+		keywordsCollection.insert({phrase: 'Safari'});
+		keywordsCollection.insert({phrase: 'Internet Explorer'});
 	} 
 	clearInterval(fakeDataPushId);
 	pushData(); 
@@ -290,12 +290,9 @@ app.get('/clearDatabase', function (req, res) {
 }); 
 
 function cleanData(){
-    var collection = myDb.collection(dbKeywordsCollection); 
-        collection.remove();
-	collection = myDb.collection(dbAnalyzingCollection); 
-        collection.remove();
-	collection = myDb.collection(dbResultsCollection); 
-        collection.remove();
+    keywordsCollection.remove();
+    resultsCollection.remove();
+    cacheCollection.remove();
 	monitoringKeywords = [];
 	output = [];
 }
@@ -310,8 +307,7 @@ function pushData(){
 	});
 	fakeData = [];
 	
-	var collection = myDb.collection(dbKeywordsCollection);
-	collection.find().toArray(function(err, docs) {
+	keywordsCollection.find().toArray(function(err, docs) {
 		monitoringKeywords = docs;  
 	});
 
@@ -331,7 +327,6 @@ function pushData(){
 
 }
 
-//Thu May 28 13:50:33 +0000 2015",
 
 function fakeDataPush(){ 
 
@@ -341,11 +336,22 @@ function fakeDataPush(){
 			clearInterval(fakeDataPushId);
 			debugLog+=" push finish";
 			return;
-		}	
-		FindOutKeyWords(line,"Thu May "+(20+randomInt(10))+" 13:50:33 +0000 2015");
+		}
+
+		var endMoment	= moment().startOf('day');
+		var startMoment	= endDate.subtract(1, 'days');
+
+		var thisDate = moment(randomDate(startMoment.toDate(), endMoment.toDate()));
+		FindOutKeyWords(line,moment(thisDate).toISOString());
+
+		// FindOutKeyWords(line,"Thu May "+(20+randomInt(10))+" 13:50:33 +0000 2015");
 		//console.log(line+'\n'+"Thu May "+(20+randomInt(10))+" 13:50:33 +0000 2015");
    	} 
 	
+}
+
+function randomDate(start, end) {
+    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
 
  
@@ -405,11 +411,8 @@ app.get('/addSingleTweet', function (req, res) {
 	console.log("addSingleTweet");
 	debugLog+="	addSingleTweet";
 	if(addOneMode){
-		//var collection = myDb.collection(dbAnalyzingCollection);
 		if(output.length>0){
-		   tmp = output.shift();
-		   //collection.insert(tmp);
-		   //console.log(tmp); 
+		   tweet = output.shift();
 
 		   var msgData = {
 		      "tweet" : tweet,
@@ -451,7 +454,6 @@ function verify(){
 
 function FindOutKeyWords(data,created_at) {
 
-	var collection = myDb.collection(dbAnalyzingCollection); 
 	for(var i=0;i<monitoringKeywords.length;i++){ 
 		tweeterText = data.toLowerCase();
 		if(tweeterText.search(monitoringKeywords[i].phrase.toString().toLowerCase())!=-1)	{
@@ -467,7 +469,6 @@ function FindOutKeyWords(data,created_at) {
 			if(addOneMode) {
 				output.push(tweet); 
 			} else {
-				//collection.insert(tweet);
 				console.log("Sending msg");
 				var msgData = {
 			      "tweet" : tweet,
@@ -548,8 +549,7 @@ function establishTwitterConnection() {
 function checkNewKeywords() {
 	// Check MongoDB Keywords Collection
 	 
-	var collection = myDb.collection(dbKeywordsCollection);
-	collection.find().toArray(function(err, docs) {
+	keywordsCollection.find().toArray(function(err, docs) {
 		if (docs.length > 0) {
 			if (JSON.stringify(monitoringKeywords) != JSON.stringify(docs)) {
 		    	monitoringKeywords = docs; 
@@ -577,16 +577,16 @@ console.log("Server listening on port " + port);
 
  
  
-setInterval(function(){ 
-	var collection = myDb.collection(dbAnalyzingCollection); 
-	collection.find().toArray(function(err, docs) {
-		console.log('number '+docs.length);
-		debugLog+=' number '+docs.length;
-		if(output.length>50){
-			output = output.slice(1,50);
-		}
-	});
-}, 5000);
+// setInterval(function(){ 
+// 	var collection = myDb.collection(dbAnalyzingCollection); 
+// 	collection.find().toArray(function(err, docs) {
+// 		console.log('number '+docs.length);
+// 		debugLog+=' number '+docs.length;
+// 		if(output.length>50){
+// 			output = output.slice(1,50);
+// 		}
+// 	});
+// }, 5000);
 
 /* 
 setTimeout(function(){ 
@@ -617,8 +617,7 @@ collection.insert({phrase: 'wow'});
 function monitorSingleWords() {
 	// Check MongoDB Keywords Collection
         //console.log("single mode");
-	var collection = myDb.collection(dbKeywordsCollection);
-	collection.find().toArray(function(err, docs) {
+	keywordsCollection.find().toArray(function(err, docs) {
 		   if (docs.length > 0) { 
 			if(JSON.stringify(preKeywords) != JSON.stringify(docs)){  
 				for(var i=0;i<docs.length;i++){
