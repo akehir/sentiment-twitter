@@ -10,6 +10,7 @@ var moment = require('moment');
 var debugLog = "";
 var liveModeIntervalId = 0;
 var fakeDataPushId = 0;
+var fakeDataDays = 10;
 var addSingleTweetIntervalId = 0;
 var flag = false;
 
@@ -111,8 +112,8 @@ function startApp() {
 	    }
 	    else {
 	      console.log('Connected to ' + opts.service + ' using client-id ' + mqlightClient.id);
-	  }
-	  /*
+	    }
+	    /*
 	     * Create our subscription
 	     */
 	    mqlightClient.on('message', processMessage);
@@ -126,7 +127,7 @@ function startApp() {
 	               mqlightSubInitialised = true;
 	             }
 	           });
-	});
+	  });
 
 
 	//Start checking for new keywords
@@ -147,7 +148,7 @@ function processMessage(data, delivery) {
 	  } catch (e) {
 	    // Expected if we already have a Javascript object
 	  }
-	  if (!tweet) {
+	  if (!analyzed) {
 	    console.error("Bad data received: " + data);
 	  }
 	  else {
@@ -339,7 +340,7 @@ function fakeDataPush(){
 		}
 
 		var endMoment	= moment().startOf('day');
-		var startMoment	= endDate.subtract(1, 'days');
+		var startMoment	= endMoment.subtract(fakeDataDays, 'days');
 
 		var thisDate = moment(randomDate(startMoment.toDate(), endMoment.toDate()));
 		FindOutKeyWords(line,moment(thisDate).toISOString());
@@ -512,8 +513,8 @@ function establishTwitterConnection() {
 					//console.log(nowToken+' '+monitoringPhrase ); 
 					
 					if (data.lang === 'en') {
-						 //console.log(data.text.toString());
-						FindOutKeyWords(data.text.toString(),data.created_at);
+						FindOutKeyWords(data.text.toString(),moment().toISOString());
+						// FindOutKeyWords(data.text.toString(),data.created_at);
 					}					 
 				}); 
 				stream.on('error', function (error) {
