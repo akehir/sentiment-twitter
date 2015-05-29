@@ -1,9 +1,13 @@
 ---
 applications:
-- name: SentimentAnalysis
+- name: SentimentAnalysis-Twitter
   memory: 128M
   instances: 1
   command: node app.js
-  host: sentimentanalysis-demo-akehir
+  host: sentimentanalysis-twitter-akehir
   domain: eu-gb.mybluemix.net
   path: .
+services: 
+   - mongodb-sentiment
+   - Monitoring and Analytics-t1
+   - sentiment-mq

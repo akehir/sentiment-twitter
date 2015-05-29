@@ -1,0 +1,9 @@
+---
+applications:
+- name: SentimentAnalysis
+  memory: 128M
+  instances: 1
+  command: node app.js
+  host: sentimentanalysis-demo-akehir
+  domain: eu-gb.mybluemix.net
+  path: .
