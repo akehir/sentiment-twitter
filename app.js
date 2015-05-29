@@ -10,7 +10,7 @@ var moment = require('moment');
 var debugLog = "";
 var liveModeIntervalId = 0;
 var fakeDataPushId = 0;
-var fakeDataDays = 10;
+var fakeDataDays = 5;
 var addSingleTweetIntervalId = 0;
 var flag = false;
 
@@ -152,14 +152,14 @@ function processMessage(data, delivery) {
 	    console.error("Bad data received: " + data);
 	  }
 	  else {
-	    console.log("Received data: " + JSON.stringify(data));
+	    //console.log("Received data: " + JSON.stringify(data));
 	    // Upper case it and publish a notification
 	    
 	    var msgData = {
 		      "analyzed" : analyzed,
 		      "frontend" : "Node.js: " + mqlightClient.id
 		    };
-		    console.log("Sending message: " + JSON.stringify(msgData));
+		    //console.log("Sending message: " + JSON.stringify(msgData));
 		    mqlightClient.send(mqlightAggregateTopic, msgData, {
 			    ttl: 60*60*1000 /* 1 hour */
 			    });
@@ -339,8 +339,8 @@ function fakeDataPush(){
 			return;
 		}
 
-		var endMoment	= moment().startOf('day');
-		var startMoment	= endMoment.subtract(fakeDataDays, 'days');
+		var endMoment	= moment().endOf('day');
+		var startMoment	= moment().startOf('day').subtract(fakeDataDays, 'days');
 
 		var thisDate = moment(randomDate(startMoment.toDate(), endMoment.toDate()));
 		FindOutKeyWords(line,moment(thisDate).toISOString());
@@ -419,7 +419,7 @@ app.get('/addSingleTweet', function (req, res) {
 		      "tweet" : tweet,
 		      "frontend" : "Node.js: " + mqlightClient.id
 		    };
-		    console.log("Sending message: " + JSON.stringify(msgData));
+		    //console.log("Sending message: " + JSON.stringify(msgData));
 		    mqlightClient.send(mqlightTweetsTopic, msgData, {
 			    ttl: 60*60*1000 /* 1 hour */
 			    });
@@ -470,13 +470,12 @@ function FindOutKeyWords(data,created_at) {
 			if(addOneMode) {
 				output.push(tweet); 
 			} else {
-				console.log("Sending msg");
 				var msgData = {
 			      "tweet" : tweet,
 			      "frontend" : "Node.js: " + mqlightClient.id
 			    };
-			    console.log(msgData);
-			    console.log("Sending message: " + JSON.stringify(msgData));
+			    //console.log("Sending message: " + JSON.stringify(msgData));
+			    console.log("Send tweet for " + tweet.phrase);
 			    mqlightClient.send(mqlightTweetsTopic, msgData, {
 				    ttl: 60*60*1000 /* 1 hour */
 				    });
