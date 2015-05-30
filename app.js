@@ -411,6 +411,7 @@ app.get('/addOneMode', function (req, res) {
 		debugLog+=" Add one mode";
 		addOneMode = true;
         	clearInterval(liveModeIntervalId);
+		clearInterval(fakeDataPushId);
 		cleanStream();
 		output = [];
 		prePhrase = [];
