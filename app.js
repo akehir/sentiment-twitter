@@ -66,6 +66,9 @@ var mongo = {};
 var keywordsCollection = null;
 var cacheCollection = null;
 var resultsCollection = null;
+var fakeData=[];
+var fakeDataBuffer = [];
+
  
 if (process.env.VCAP_SERVICES) {
     var env = JSON.parse(process.env.VCAP_SERVICES);
@@ -133,6 +136,8 @@ function startApp() {
 
 	//Start checking for new keywords
 	liveModeIntervalId = setInterval(function(){ checkNewKeywords();},  2000); 
+	
+	loadDemoData();
     //console.log(liveModeIntervalId);
 }
 
@@ -230,8 +235,7 @@ var demoAgain = false;
   
 
 // REST API
-app.get('/reset', function (req, res) {
-
+function restart(){
 	if(addOneMode){ 		
 		clearInterval(addSingleTweetIntervalId);
 		cleanStream();
@@ -248,7 +252,11 @@ app.get('/reset', function (req, res) {
 	verify();
 	liveModeIntervalId = setInterval(function(){ checkNewKeywords();},  2000); 	
 	//establishTwitterConnection();
-	console.log("restart request");
+	console.log("restart request"); 
+}
+app.get('/reset', function (req, res) {
+
+	restart();
 	res.send(200);
 }); 
 
@@ -308,6 +316,7 @@ app.get('/clearDatabase', function (req, res) {
 	demoMode = false;
 	demoAgain = false;
 	cleanData(); 	
+	restart();
 	res.send(200);	 
 }); 
 
@@ -330,8 +339,7 @@ app.post('/adjustNumber', function (req, res) {
 	res.send(200);	 
 }); 
 
-var fakeData=[];
-function pushData(){
+function loadDemoData(){
 	if(rd)rd.close();
 	clearInterval(fakeDataPushId);
 	var fs = require('fs'),readline = require('readline');
@@ -340,17 +348,7 @@ function pushData(){
     		output: process.stdout,
                 terminal: false
 	});
-	fakeData = [];
-	
-	keywordsCollection.find().toArray(function(err, docs) {
-		monitoringKeywords = docs;  
-	});
-
-	if(pushLine==null)
-		pushLine = 1000; 
-	debugLog+=" push start"; 
- 	fakeDataPushId = setInterval(function(){ fakeDataPush()},  1000);
-
+	fakeDataBuffer = [];
 	rd.on('line', function(line) {
 		fakeData.push(line.toString()); 
 	});
@@ -358,6 +356,22 @@ function pushData(){
 		rd.close();
 			 
 	}); 
+	
+}
+function pushData(){
+	 
+	clearInterval(fakeDataPushId);  
+	fakeData = fakeData.concat(fakeDataBuffer);
+
+	keywordsCollection.find().toArray(function(err, docs) {
+		monitoringKeywords = docs;  
+	});
+
+	if(pushLine==null)
+		pushLine = 1000; 
+	debugLog+=" push start"; 
+ 	fakeDataPushId = setInterval(function(){ fakeDataPush()},  1000); 
+	
 
 }
 
