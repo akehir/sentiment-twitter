@@ -49,6 +49,10 @@ app.controller('myCtrl', function($scope, $http, $timeout) {
         $http.get('/addSingleTweet').success(function(data) {
         });
     };
+    $scope.adjustNumber = function() {
+	alert("adjust "+$scope.addTerm);
+        $http.post('/adjustNumber',{phrase:$scope.addTerm}).success(function(data, status, headers, config) {});   
+    };
      $scope.reset = function() {
         $http.get('/reset').success(function(data) {
 		message = "";

@@ -66,7 +66,7 @@ var mongo = {};
 var keywordsCollection = null;
 var cacheCollection = null;
 var resultsCollection = null;
-
+ 
 if (process.env.VCAP_SERVICES) {
     var env = JSON.parse(process.env.VCAP_SERVICES);
 
@@ -78,10 +78,11 @@ if (process.env.VCAP_SERVICES) {
 } else {
    console.log("No VCAP Services!");
    mongo['url'] = "mongodb://localhost:27017/ase";
-} 
+}  
 
 var myDb; 
-var mongoConnection = mongoClient.connect(mongo.url, function(err, db) {
+var mongoConnection = mongoClient.connect('mongodb://127.0.0.1/mydb', function(err, db) {
+//var mongoConnection = mongoClient.connect(mongo.url, function(err, db) {
     
    if(!err) {
     console.log("Connection to mongoDB established");
@@ -177,6 +178,12 @@ var stream;
 var currentStream=null;
 var token=[
 {
+    consumer_key: 'Gs4i9JmcGuMroTmsL6XdgK6nV',
+    consumer_secret: 'WYZA0JsuOqz9xugxWznJZtf4Z3H2tjW0jOoj9ZOzxVR7qE2UvZ',
+    access_token_key: '3303632267-QLB6gYCBx3hkDqGuQhikltuQWxJT2MTYobczOxo',
+    access_token_secret: 'T3ISIKx7sW8SkmblAQpGmlYADrTiDxrRKk9eKzY0515ve'
+},
+{
     consumer_key: 'pxgpKlOkM2ZzDtDtHdN1rNGHE',
     consumer_secret: 'OD8y15tzLopptWGTgsODsXxCInEQ9qp3h9mQtGtXK9qR4rlmHm',
     access_token_key: '2151132853-K7nCNfeCbSjdSZvOgyfm7NCMPlweIxVAFsZzQE6',
@@ -214,7 +221,7 @@ var token=[
 }
 ];
 
-var nowToken = 4;
+var nowToken = 0;
 var tweeter = new twitter(token[nowToken]);
 var numberID = 6;
 var pushLine=1000; 
@@ -251,8 +258,8 @@ app.get('/liveMode', function (req, res) {
 		cleanStream();
 		addOneMode = false;
 	} 
-	//liveModeIntervalId = setInterval(function(){ checkNewKeywords();},  2000);	
-	//establishTwitterConnection();
+	liveModeIntervalId = setInterval(function(){ checkNewKeywords();},  2000);	
+	establishTwitterConnection();
 	console.log("Live mode request");
 	debugLog+="	Live mode request";
 	res.send(200);
@@ -282,7 +289,7 @@ app.post('/demoMode', function (req, res) {
 				}
 			}
 			if(!flag){
-				keywordsCollection.insert(tweeterText[i]); 
+				keywordsCollection.insert({phrase: tweeterText[i]}); 
 			}
 			flag = false;
 		}
@@ -306,10 +313,20 @@ function cleanData(){
 	monitoringKeywords = [];
 	output = [];
 }
+app.post('/adjustNumber', function (req, res) {
+	console.log('adjust '+pushLine);
+	debugLog+="adjust "+pushLine;	
+	if (req.body.phrase) {
+		pushLine = req.body.phrase;
+	}  
+	pushData();
+	res.send(200);	 
+}); 
 
 var fakeData=[];
 function pushData(){
 	if(rd)rd.close();
+	clearInterval(fakeDataPushId);
 	var fs = require('fs'),readline = require('readline');
         var rd = readline.createInterface({
    	        input: fs.createReadStream('big.txt'),
@@ -324,8 +341,7 @@ function pushData(){
 
 	if(pushLine==null)
 		pushLine = 1000; 
-	debugLog+=" push start";
-	console.log(pushLine);
+	debugLog+=" push start"; 
  	fakeDataPushId = setInterval(function(){ fakeDataPush()},  1000);
 
 	rd.on('line', function(line) {
@@ -346,8 +362,8 @@ function fakeDataPush(){
 		if(line==null){	
 			clearInterval(fakeDataPushId);
 			debugLog+=" push finish";
-			pushData();
 			debugLog+=" push again";
+			pushData();
 			return;
 		}
 
@@ -400,6 +416,8 @@ app.get('/addOneMode', function (req, res) {
 		monitoringKeywords = [];
 		for(var i=0;i<preKeywords.length;i++)
 			prePhrase.push(preKeywords[i].phrase); 
+		addSingleTweetIntervalId = setInterval(function(){ monitorSingleWords();},  2000);		
+		establishTwitterConnection();	
 		 
 		
 	}	 
@@ -470,7 +488,7 @@ function FindOutKeyWords(data,created_at) {
 	for(var i=0;i<monitoringKeywords.length;i++){ 
 		tweeterText = data.toLowerCase();
 		if(tweeterText.search(monitoringKeywords[i].phrase.toString().toLowerCase())!=-1)	{
-			console.log(monitoringKeywords[i].phrase);
+			//console.log(monitoringKeywords[i].phrase);
 			if(!demoMode)
 				debugLog+=' '+monitoringKeywords[i].phrase;
 			//console.log(created_at);
@@ -487,7 +505,7 @@ function FindOutKeyWords(data,created_at) {
 			      "frontend" : "Node.js: " + mqlightClient.id
 			    };
 			    //console.log("Sending message: " + JSON.stringify(msgData));
-			    console.log("Send tweet for " + tweet.phrase);
+			    //console.log("Send tweet for " + tweet.phrase);
 			    mqlightClient.send(mqlightTweetsTopic, msgData, {
 				    ttl: 60*60*1000 /* 1 hour */
 				    });
@@ -582,8 +600,8 @@ function checkNewKeywords() {
 }
 
 
-//app.listen(3337,'127.0.0.1');
-app.listen(port);
+app.listen(3337,'127.0.0.1');
+//app.listen(port);
 
 console.log("Server listening on port " + port);
 
