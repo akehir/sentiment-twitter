@@ -62,6 +62,9 @@ app.controller('myCtrl', function($scope, $http, $timeout) {
     var refresh = function() {
     	$http.get('/sentiment').success(function(data) { 
 	     message = message +'	' + data  
+	     if(message.length > 10000){
+			message = "";
+	     }
 	     $scope.debug = message;
     	});
     };
