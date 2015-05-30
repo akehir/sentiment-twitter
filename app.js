@@ -135,8 +135,7 @@ function startApp() {
 
 
 	//Start checking for new keywords
-	liveModeIntervalId = setInterval(function(){ checkNewKeywords();},  2000); 
-	
+	liveModeIntervalId = setInterval(function(){ checkNewKeywords();},  2000);	
 	loadDemoData();
     //console.log(liveModeIntervalId);
 }
@@ -350,7 +349,7 @@ function loadDemoData(){
 	});
 	fakeDataBuffer = [];
 	rd.on('line', function(line) {
-		fakeData.push(line.toString()); 
+		fakeDataBuffer.push(line.toString()); 
 	});
 	rd.on('close', function() { 
 		rd.close();
