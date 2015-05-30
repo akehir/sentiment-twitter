@@ -420,7 +420,7 @@ app.get('/addOneMode', function (req, res) {
 		for(var i=0;i<preKeywords.length;i++)
 			prePhrase.push(preKeywords[i].phrase); 
 		addSingleTweetIntervalId = setInterval(function(){ monitorSingleWords();},  2000);		
-		establishTwitterConnection();	
+		//establishTwitterConnection();	
 		 
 		
 	}	 
