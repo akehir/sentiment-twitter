@@ -81,8 +81,8 @@ if (process.env.VCAP_SERVICES) {
 }  
 
 var myDb; 
-var mongoConnection = mongoClient.connect('mongodb://127.0.0.1/mydb', function(err, db) {
-//var mongoConnection = mongoClient.connect(mongo.url, function(err, db) {
+//var mongoConnection = mongoClient.connect('mongodb://127.0.0.1/mydb', function(err, db) {
+var mongoConnection = mongoClient.connect(mongo.url, function(err, db) {
     
    if(!err) {
     console.log("Connection to mongoDB established");
@@ -314,12 +314,14 @@ function cleanData(){
 	output = [];
 }
 app.post('/adjustNumber', function (req, res) {
-	console.log('adjust '+pushLine);
-	debugLog+="adjust "+pushLine;	
-	if (req.body.phrase) {
-		pushLine = req.body.phrase;
-	}  
-	pushData();
+	if(demoMode){
+		console.log('adjust '+pushLine);
+		debugLog+="adjust "+pushLine;	
+		if (req.body.phrase) {
+			pushLine = req.body.phrase;
+		}  
+		pushData();
+	}
 	res.send(200);	 
 }); 
 
@@ -600,8 +602,8 @@ function checkNewKeywords() {
 }
 
 
-app.listen(3337,'127.0.0.1');
-//app.listen(port);
+//app.listen(3337,'127.0.0.1');
+app.listen(port);
 
 console.log("Server listening on port " + port);
 
