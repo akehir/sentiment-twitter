@@ -251,8 +251,8 @@ app.get('/liveMode', function (req, res) {
 		cleanStream();
 		addOneMode = false;
 	} 
-	liveModeIntervalId = setInterval(function(){ checkNewKeywords();},  2000);	
-	establishTwitterConnection();
+	//liveModeIntervalId = setInterval(function(){ checkNewKeywords();},  2000);	
+	//establishTwitterConnection();
 	console.log("Live mode request");
 	debugLog+="	Live mode request";
 	res.send(200);
@@ -272,11 +272,20 @@ app.post('/demoMode', function (req, res) {
 	clearInterval(addSingleTweetIntervalId);
 	cleanStream(); 
 	if(!demoAgain){
-		keywordsCollection.insert({phrase: 'Chrome'});	
-		keywordsCollection.insert({phrase: 'Firefox'});	
-		keywordsCollection.insert({phrase: 'Opera'});	
-		keywordsCollection.insert({phrase: 'Safari'});
-		keywordsCollection.insert({phrase: 'Internet Explorer'});
+		var flag = false;
+		var tweeterText=['Chrome','Firefox','Opera','Safari','Internet Explorer'];
+		for(var i=0;i<tweeterText.length;i++){
+			for(var j=0;j<monitoringKeywords.length;j++){
+				if(tweeterText[i].toString().toLowerCase()==monitoringKeywords[j].phrase.toString().toLowerCase()){
+					flag = true; 
+					break;
+				}
+			}
+			if(!flag){
+				keywordsCollection.insert(tweeterText[i]); 
+			}
+			flag = false;
+		}
 	} 
 	clearInterval(fakeDataPushId);
 	pushData(); 
@@ -300,6 +309,7 @@ function cleanData(){
 
 var fakeData=[];
 function pushData(){
+	if(rd)rd.close();
 	var fs = require('fs'),readline = require('readline');
         var rd = readline.createInterface({
    	        input: fs.createReadStream('big.txt'),
@@ -336,6 +346,8 @@ function fakeDataPush(){
 		if(line==null){	
 			clearInterval(fakeDataPushId);
 			debugLog+=" push finish";
+			pushData();
+			debugLog+=" push again";
 			return;
 		}
 
