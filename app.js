@@ -236,7 +236,10 @@ app.get('/reset', function (req, res) {
 		clearInterval(addSingleTweetIntervalId);
 		cleanStream();
 		addOneMode = false; 
-	}	
+	}
+	
+	demoMode = false;
+	demoAgain = false;	
 	clearInterval(liveModeIntervalId); 	
 	cleanStream();	
 	nowToken = (nowToken+1)%numberID;
@@ -302,6 +305,8 @@ app.post('/demoMode', function (req, res) {
 
 app.get('/clearDatabase', function (req, res) {
 	console.log("Clear database request"); 
+	demoMode = false;
+	demoAgain = false;
 	cleanData(); 	
 	res.send(200);	 
 }); 
