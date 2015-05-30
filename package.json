@@ -1,6 +1,6 @@
 {
-  "name": "SimpleSentimentAnalysisApp",
-  "description": "Simple Sentiment Analysis App",
+  "name": "SentiTwitter",
+  "description": "UZH - Advanced Software Engineering - Sentiment Twitter",
   "version": "0.9.1",
   "dependencies": {
     "express": "^3.3.4",
@@ -15,9 +15,9 @@
     "grunt-contrib-jshint": "~0.6.3"
   },
   "engines": {
-    "node": "0.10.26"
+    "node": "0.10.38"
   },
   "scripts": {
-    "start": "node app.js"
+    "start": "node --expose-gc app.js"
   }
 }
