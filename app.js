@@ -587,8 +587,10 @@ function establishTwitterConnection() {
                         tweeter = new twitter(token[(nowToken++) % numberID]);
                         console.log('nowToken ' + nowToken);
                         debugLog += ' nowToken ' + nowToken;
-                        if (nowToken > 15)
+                        if (nowToken > 15) {
+                            console.log("All twitter tokens were rejected, exiting app.");
                             process.exit(1);
+                        }
                         establishTwitterConnection();
                     }, 2000);
 
@@ -638,43 +640,6 @@ app.listen(port);
 
 console.log("Server listening on port " + port);
 
-
-// setInterval(function(){ 
-// 	var collection = myDb.collection(dbAnalyzingCollection); 
-// 	collection.find().toArray(function(err, docs) {
-// 		console.log('number '+docs.length);
-// 		debugLog+=' number '+docs.length;
-// 		if(output.length>50){
-// 			output = output.slice(1,50);
-// 		}
-// 	});
-// }, 5000);
-
-/* 
- setTimeout(function(){
- var collection = myDb.collection(dbKeywordsCollection);
- collection.insert({phrase: 'coke'});
- //location.reload();
- }, 600);
-
-
- setTimeout(function(){
- var collection = myDb.collection(dbKeywordsCollection);
- collection.insert({phrase: 'android'});
- //location.reload();
- }, 10000);
- setTimeout(function(){
- var collection = myDb.collection(dbKeywordsCollection);
- collection.insert({phrase: 'bread'});
- //location.reload();
- }, 15000);
- setTimeout(function(){
- var collection = myDb.collection(dbKeywordsCollection);
- collection.insert({phrase: 'wow'});
- }, 20000);
- */
-
-
 function monitorSingleWords() {
     // Check MongoDB Keywords Collection
     //console.log("single mode");
@@ -704,4 +669,3 @@ app.get('/sentiment', function (req, res) {
     debugLog = '';
 
 });
- 
