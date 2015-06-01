@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="akehir.com">
+    <serverData>
+      <paths name="akehir.com">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/appsrv/sentiment-twitter" local="$PROJECT_DIR$" web="/appsrv/sentiment-twitter" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>
